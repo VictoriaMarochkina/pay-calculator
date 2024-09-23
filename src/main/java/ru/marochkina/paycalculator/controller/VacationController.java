@@ -1,6 +1,5 @@
 package ru.marochkina.paycalculator.controller;
 
-import ru.marochkina.paycalculator.model.VacationData;
 import ru.marochkina.paycalculator.model.VacationResponse;
 import ru.marochkina.paycalculator.service.VacationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,12 @@ public class VacationController {
     @Autowired
     private VacationService vacationService;
 
-    @PostMapping
-    public ResponseEntity<VacationResponse> calculateVacationPay(@RequestBody VacationData request) {
-        BigDecimal vacationPay = vacationService.calculateVacationPay(request);
+    @GetMapping
+    public ResponseEntity<VacationResponse> calculateVacationPay(@RequestParam BigDecimal averageSalary,
+                                                                 @RequestParam int vacationDays,
+                                                                 @RequestParam(required = false) String startDate,
+                                                                 @RequestParam(required = false) String endDate) {
+        BigDecimal vacationPay = vacationService.calculateVacationPay(averageSalary, vacationDays, startDate, endDate);
         return ResponseEntity.ok(new VacationResponse(vacationPay));
     }
 }

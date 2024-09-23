@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.stereotype.Service;
-import ru.marochkina.paycalculator.model.VacationData;
 
 @Service
 public class VacationService {
@@ -46,28 +45,28 @@ public class VacationService {
         holidays.add(LocalDate.of(2024, 11, 4));
     }
 
-    public BigDecimal calculateVacationPay(VacationData request) {
-        int vacationDays = calculateVacationDays(request);
-
-        BigDecimal averageSalary = request.getAverageSalary();
+    public BigDecimal calculateVacationPay(BigDecimal averageSalary, int vacationDays, String startDate, String endDate) {
+        int days = calculateVacationDays(startDate, endDate, vacationDays);
 
         BigDecimal dailySalary = averageSalary.divide(AVERAGE_DAYS_IN_MONTH, 10, RoundingMode.HALF_UP);
 
-        BigDecimal vacationPay = dailySalary.multiply(BigDecimal.valueOf(vacationDays));
+        BigDecimal vacationPay = dailySalary.multiply(BigDecimal.valueOf(days));
 
-        // Округляем до двух знаков после запятой
         return vacationPay.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private int calculateVacationDays(VacationData request) {
-        if (request.getStartDate() != null && request.getEndDate() != null) {
-            return calculateWithHolidays(request.getStartDate(), request.getEndDate());
+    private int calculateVacationDays(String startDate, String endDate, int vacationDays) {
+        if (startDate != null && endDate != null) {
+            return calculateWithHolidays(startDate, endDate);
         } else {
-            return request.getVacationDays();
+            return vacationDays;
         }
     }
 
-    private int calculateWithHolidays(LocalDate startDate, LocalDate endDate) {
+    private int calculateWithHolidays(String startDateStr, String endDateStr) {
+        LocalDate startDate = LocalDate.parse(startDateStr);
+        LocalDate endDate = LocalDate.parse(endDateStr);
+
         return (int) startDate.datesUntil(endDate.plusDays(1))
                 .filter(this::isWorkingDay)
                 .count();
